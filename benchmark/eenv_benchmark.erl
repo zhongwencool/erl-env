@@ -138,20 +138,6 @@ cleanup() ->
     application:unload(ssl),
     ok.
 
-test_code() ->
-    Count = 10000,
-    MinProcNum = 100,
-    MaxProcNum = 1000,
-    io:format("~s~n", [lists:duplicate(30, $-)]),
-    io:format("|Process|Time/(Count*ProcNum)|~n"),
-    Func = fun() -> run_code(Count) end,
-    lists:foreach(fun(ProcNum) ->
-        Time = benchmark(ProcNum, Func),
-        io:format("|~6w | ~17.4fns| ~n", [ProcNum, Time/(Count*ProcNum)])
-                  end, lists:seq(MinProcNum, MaxProcNum, 100)),
-    io:format("~s~n", [lists:duplicate(30, $-)]),
-    ok.
-
 benchmark(ProcNum, Func) ->
     erlang:garbage_collect(),
     Pids = [begin spawn(fun() -> worker(Func) end) end|| _<- lists:seq(1, ProcNum)],
@@ -326,3 +312,17 @@ run_map(Count, Map) ->
     #{?PAR_165 := {ok, test_val}} = Map,
     #{?PAR_185 := {ok, test_val}} = Map,
     run_map(Count - ?INCR, Map).
+
+test_code() ->
+    Count = 10000,
+    MinProcNum = 100,
+    MaxProcNum = 1000,
+    io:format("~s~n", [lists:duplicate(30, $-)]),
+    io:format("|Process|Time/(Count*ProcNum)|~n"),
+    Func = fun() -> run_code(Count) end,
+    lists:foreach(fun(ProcNum) ->
+        Time = benchmark(ProcNum, Func),
+        io:format("|~6w | ~17.4fns| ~n", [ProcNum, Time/(Count*ProcNum)])
+                  end, lists:seq(MinProcNum, MaxProcNum, 100)),
+    io:format("~s~n", [lists:duplicate(30, $-)]),
+    ok.

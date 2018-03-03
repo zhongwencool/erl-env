@@ -1,5 +1,5 @@
 {application, eenv,
- [{description, "Application ENV Manager"},
+ [{description, "Application Configuration Manager"},
   {vsn, "0.1.0"},
   {registered, []},
   {applications,
@@ -7,7 +7,7 @@
   {env,[]},
   {modules, []},
   
-  {maintainers, []},
+  {maintainers, ["zhongwencool"]},
   {licenses, ["MIT"]},
-  {links, []}
+  {links, [{"Github", "https://github.com/zhongwencool/erl-env"}]}
  ]}.

@@ -1,5 +1,10 @@
-erlenv
+erl-env
 =====
+[![Github Tag](https://img.shields.io/github/tag/zhongwencool/erl-env.svg)](https://github.com/zhongwencool/erl-env)
+[![Build Status](https://travis-ci.org/zhongwencool/erl-env.svg?branch=master)](https://travis-ci.org/zhongwencool/erl-env)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/zhongwencool/erl-env)
+[![Hex.pm](https://img.shields.io/hexpm/v/eenv.svg)](http://hex.pm/packages/eenv)
+[![Hex.pm Downloads](https://img.shields.io/hexpm/dt/eenv.svg?style=flat-square)](https://hex.pm/packages/eenv)
 
 ## Goal
 `eenv` makes retrieving configuration parameters used by application faster and more stable then *application:get_env*.
@@ -55,6 +60,7 @@ LogLevel = eenv:get(appname_2, log_level, error),
 LogPath = eenv:get(appname_1, log_path, "log/error.log").
 ```
 Each loaded application will generate `eenv_'AppName'.beam` to save own configuration information.
+
 `eenv`'s code is very straightforward(lines < 200) and worth a visit.
   
 ## Quick Start
@@ -238,25 +244,25 @@ eenv|               206175.821|           2061758.207|       10914.20x  rec |   
 but the problem is that it's very memory consuming(N copy data with N processes running) and difficult to update.
 `dict/rec ≈ 2.50`, `map/rec ≈ 3.10`, `map/dict ≈ 1.24`.
 
-- `eenv` and `static code beam` almost the same, depend on the clause order and test sample.
+- `eenv` and `code`(static beam) almost the same, depend on the clause order and test sample.
 
 - `eenv/app ≈ 7.20`  and `eenv` cost less CPU resources than `app`.
    
 - If CPU resources enough, `eenv` slower then `dict` about 6 times, and cost more CPU.
 
 ### Confused
- - Why eenv and code time is increase? it should be constant.
+ - Why eenv/code time is increase? it should be constant.
  
    It exhausts CPU resources when lots of processes running in busy circle, so time trend to increase.
    
  - But why dict/map/rec time almost constant?
  
    It only increase not obvious way.
-   Because fetch data from memory cost less CPU, and super fast(0.0x us) make it's hard to create lots of processes running at same time. 
+   Because fetch data from memory cost very little CPU and super fast(0.0x us), it's hard to create lots of processes running at same time. 
    You should see increase when run `make benchmark50000`.  
 
 ## ChangeLog
 
 ## License
-MIT.
+See the [LICENSE](https://github.com/zhongwencool/erl-env/blob/master/LICENSE) file for license rights and limitations (MIT).
           
