@@ -243,10 +243,11 @@ eenv|               206175.821|           2061758.207|       10914.20x  rec |   
 - `dict`, `rec`, `map` copy params into process memory is faster and consume less resources then `eenv`, `app`, `code`, 
 but the problem is that it's very memory consuming(N copy data with N processes running) and difficult to update.
 `dict/rec ≈ 2.50`, `map/rec ≈ 3.10`, `map/dict ≈ 1.24`.
+**speed**: `record > map > dictionary`
 
 - `eenv` and `code`(static beam) almost the same, depend on the clause order and test sample.
 
-- `eenv/app ≈ 7.20`  and `eenv` cost less CPU resources than `app`.
+- `eenv` is about 7.2 times faster than `app` and `eenv` cost less CPU resources than `app`.
    
 - If CPU resources enough, `eenv` slower then `dict` about 6 times, and cost more CPU.
 
