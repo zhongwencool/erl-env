@@ -1,6 +1,6 @@
 {application, eenv,
     [{description, "Application Configuration Manager"},
-        {vsn, "0.1.0"},
+        {vsn, "0.1.1"},
         {registered, []},
         {applications,
             [kernel, stdlib]},

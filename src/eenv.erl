@@ -58,9 +58,9 @@ unload(Apps) when is_list(Apps) ->
 get(Application, Par) ->
     ?ROUTER_MOD:get(Application, Par).
 
-%% @doc Works like get/2 but
+%% @doc Works like {@link get/2} but
 %% Returns value Default when configuration parameter Par does not exist.
-%% Returns `application:get_env(Application, Par, Default)` when application is not loaded by eenv.
+%% Returns <a href="http://erlang.org/doc/apps/kernel/application.html#get_env-3"><tt>application:get_env(App, Par, Default)</tt></a> when application is not loaded by eenv.
 -spec get(Application, Par, Default) -> Val when
     Application :: atom(),
     Par :: atom(),
@@ -73,7 +73,7 @@ get(Application, Par, Default) ->
         ?UNLOADED -> application:get_env(Application, Par, Default)
     end.
 
-%% @doc Sets the value of configuration parameter Par for Application. Same as 'application:set_env/3`.
+%% @doc Sets the value of configuration parameter Par for Application. Same as <a href="http://erlang.org/doc/apps/kernel/application.html#get_env-3"><tt>application:get_env/3</tt></a>.
 %% Use this function only if you know what you are doing, that is, on your own applications.
 %% It is very application-dependent and configuration parameter-dependent when and how often the value is read by the application.
 %% Careless use of this function can put the application in a weird, inconsistent, and malfunctioning state.
@@ -86,7 +86,7 @@ set(Application, Par, Val) ->
     load_app_module(Application),
     ok.
 
-%% @doc Sets the value of configuration parameter Par for Application. Same as 'application:set_env/4`.
+%% @doc Sets the value of configuration parameter Par for Application. Same as <a href="http://erlang.org/doc/apps/kernel/application.html#set_env-4"><tt>application:set_env/4</tt></a>.
 -spec set(Application, Par, Val, Opt) -> 'ok' when
     Application :: atom(),
     Par :: atom(),
@@ -97,7 +97,7 @@ set(Application, Par, Val, Opt) ->
     load_app_module(Application),
     ok.
 
-%% @doc Works like set/3. with setting in batches.
+%% @doc Works like {@link set/3}. with setting in batches.
 -spec set(Application, List) -> 'ok' when
     Application :: atom(),
     List :: [{atom(), term()}].
@@ -107,7 +107,7 @@ set(Application, List) ->
     ok.
 
 %% @doc Removes the configuration parameter Par and its value for Application.
-%% Same as 'application:unset_env(Application, Par)`.
+%% Same as <a href="http://erlang.org/doc/apps/kernel/application.html#unset_env-2"><tt> application:unset_env(Application, Par)</tt></a>.
 -spec unset(Application, Pars) -> 'ok' when
     Application :: atom(),
     Pars :: atom() | [atom()].
@@ -121,7 +121,7 @@ unset(Application, Pars) when is_list(Pars) ->
     ok.
 
 %% @doc Removes the configuration parameter Par and its value for Application.
-%% Same as 'application:unset_env(Application, Par, Opt)`.
+%% Same as <a href="http://erlang.org/doc/apps/kernel/application.html#unset_env-3"><tt> application:unset_env(Application, Par, Opt)</tt></a>.
 -spec unset(Application, Pars, Opt) -> 'ok' when
     Application :: atom(),
     Opt :: [{timeout, timeout()} | {persistent, boolean()}],
