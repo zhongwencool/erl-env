@@ -13,13 +13,14 @@
 -define(ROUTER_MOD, eenv_router).
 -define(GET, get).
 -define(SET, set).
+-define(GET_LOADED_APPS, get_loaded_apps).
 -define(NONE, none).
 -define(UNDEFINED, undefined).
 -define(UNLOADED, unloaded).
 -define(COMPILE_OPT, [verbose, report_errors, report_warnings]).
 
 %% -module(Module).
--define(make_module(MOD_),erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(MOD_)])).
+-define(make_module(MOD_), erl_syntax:attribute(erl_syntax:atom(module), [erl_syntax:atom(MOD_)])).
 %% -export([Function/N]).
 -define(make_export(FUNC_, N_), erl_syntax:attribute(
     erl_syntax:atom(export),
@@ -33,16 +34,16 @@
 %% @doc Loads the application configuration for an application into the beam.
 -spec load(Applications) -> 'ok' when
     Applications :: atom() | [atom()].
-load(App)when is_atom(App) ->
+load(App) when is_atom(App) ->
     load([App]);
-load(Apps)when is_list(Apps) ->
+load(Apps) when is_list(Apps) ->
     load_app_module(Apps),
     update_router_module(load, Apps).
 
 %% @doc Deletes the application configuration beam file.
-unload(App)when is_atom(App) ->
+unload(App) when is_atom(App) ->
     unload([App]);
-unload(Apps)when is_list(Apps) ->
+unload(Apps) when is_list(Apps) ->
     update_router_module(unload, Apps),
     unload_app_module(Apps).
 
@@ -101,7 +102,7 @@ set(Application, Par, Val, Opt) ->
     Application :: atom(),
     List :: [{atom(), term()}].
 set(Application, List) ->
-    [begin ok = application:set_env(Application, Par, Value) end||{Par, Value} <- List],
+    [begin ok = application:set_env(Application, Par, Value) end || {Par, Value} <- List],
     load_app_module(Application),
     ok.
 
@@ -110,12 +111,12 @@ set(Application, List) ->
 -spec unset(Application, Pars) -> 'ok' when
     Application :: atom(),
     Pars :: atom() | [atom()].
-unset(Application, Par)when is_atom(Par) ->
+unset(Application, Par) when is_atom(Par) ->
     ok = application:unset_env(Application, Par),
     load_app_module(Application),
     ok;
-unset(Application, Pars)when is_list(Pars) ->
-    [begin ok = application:unset_env(Application, Par) end|| Par <- Pars],
+unset(Application, Pars) when is_list(Pars) ->
+    [begin ok = application:unset_env(Application, Par) end || Par <- Pars],
     load_app_module(Application),
     ok.
 
@@ -125,12 +126,12 @@ unset(Application, Pars)when is_list(Pars) ->
     Application :: atom(),
     Opt :: [{timeout, timeout()} | {persistent, boolean()}],
     Pars :: atom() | [atom()].
-unset(Application, Par, Opt)when is_atom(Par) ->
+unset(Application, Par, Opt) when is_atom(Par) ->
     ok = application:unset_env(Application, Par, Opt),
     load_app_module(Application),
     ok;
-unset(Application, Pars, Opt)when is_list(Pars) ->
-    [begin ok = application:unset_env(Application, Par, Opt) end|| Par <- Pars],
+unset(Application, Pars, Opt) when is_list(Pars) ->
+    [begin ok = application:unset_env(Application, Par, Opt) end || Par <- Pars],
     load_app_module(Application),
     ok.
 
@@ -138,15 +139,20 @@ unset(Application, Pars, Opt)when is_list(Pars) ->
 %% Internal functions
 %%====================================================================
 update_router_module(Type, UpdateApps) ->
-    Apps = application:get_env(eenv, metadata, []),
+    Apps = get_loaded_apps(),
     LoadApps = case Type of load -> Apps ++ UpdateApps; unload -> Apps -- UpdateApps end,
     SortApps = lists:usort(LoadApps),
-    ok = application:set_env(eenv, metadata, SortApps),
     Forms = router_forms(SortApps),
     {ok, ?ROUTER_MOD, Bin} = compile:forms(Forms, ?COMPILE_OPT),
     code:purge(?ROUTER_MOD),
     {module, ?ROUTER_MOD} = code:load_binary(?ROUTER_MOD, "eenv_router.beam", Bin),
     ok.
+
+get_loaded_apps() ->
+    case erlang:function_exported(?ROUTER_MOD, ?GET_LOADED_APPS, 0) of
+        true -> ?ROUTER_MOD:?GET_LOADED_APPS();
+        false -> []
+    end.
 
 %% eenv_router.beam
 %%-module(eenv_router).
@@ -158,7 +164,9 @@ router_forms(LoadApps) ->
     [begin erl_syntax:revert(X) end || X <- [
         ?make_module(?ROUTER_MOD),
         ?make_export(?GET, 2),
-        make_router_func(LoadApps)
+        ?make_export(?GET_LOADED_APPS, 0),
+        make_router_func(LoadApps),
+        make_loaded_apps_func(LoadApps)
     ]].
 
 make_router_func(LoadApps) ->
@@ -171,6 +179,12 @@ make_router_func(LoadApps) ->
     ],
     Clause = make_router_clause(LoadApps, DefaultClause),
     erl_syntax:function(erl_syntax:atom(?GET), Clause).
+
+make_loaded_apps_func(LoadApps) ->
+    Clause =
+        [erl_syntax:clause([], none,
+            [erl_syntax:abstract(LoadApps)])],
+    erl_syntax:function(erl_syntax:atom(?GET_LOADED_APPS), Clause).
 
 make_router_clause([], Acc) -> Acc;
 make_router_clause([LoadApp | TailApps], Acc) ->
@@ -194,7 +208,7 @@ load_app_module([]) -> ok;
 load_app_module([LoadApp | LoadApps]) ->
     load_app_module(LoadApp),
     load_app_module(LoadApps);
-load_app_module(App)when is_atom(App) ->
+load_app_module(App) when is_atom(App) ->
     AppMod = ?make_app_mod(App),
     Kvs = application:get_all_env(App),
     SortKvs = lists:keysort(1, Kvs),
@@ -231,11 +245,11 @@ make_app_clause([{Par, Val} | Kvs], Acc) ->
         erl_syntax:clause([erl_syntax:abstract(Par)],
             ?NONE,
             [erl_syntax:abstract({ok, Val})]),
-    make_app_clause(Kvs, [Clause| Acc]).
+    make_app_clause(Kvs, [Clause | Acc]).
 
 %% delete eenv_'$load_app'.beam
 unload_app_module([]) -> ok;
-unload_app_module([App|UnloadApps]) ->
+unload_app_module([App | UnloadApps]) ->
     unload_app_module(App),
     unload_app_module(UnloadApps);
 unload_app_module(UnloadApp) ->
@@ -303,7 +317,7 @@ load_test() ->
     AppBeam = list_to_atom("eenv_" ++ atom_to_list(App)),
     ?assertException(error, undef, AppBeam:module_info(exports)),
     ok = eenv:load(App),
-    ?assertEqual([{get,1}, {module_info,0},{module_info,1}], lists:usort(AppBeam:module_info(exports))),
+    ?assertEqual([{get, 1}, {module_info, 0}, {module_info, 1}], lists:usort(AppBeam:module_info(exports))),
     ?assertEqual({ok, []}, eenv:get(App, included_applications)),
     ?assertEqual(undefined, eenv:get(App, no_exist)),
     ?assertEqual(?UNLOADED, eenv:get(no_load_app, no_exist)),
@@ -311,5 +325,5 @@ load_test() ->
     ?assertException(error, undef, AppBeam:module_info(exports)),
     ?assertEqual(?UNLOADED, eenv:get(App, no_exist)),
     ok.
-    
+
 -endif.

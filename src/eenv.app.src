@@ -1,13 +1,12 @@
 {application, eenv,
- [{description, "Application Configuration Manager"},
-  {vsn, "0.1.0"},
-  {registered, []},
-  {applications,
-   [kernel, stdlib]},
-  {env,[]},
-  {modules, []},
-  
-  {maintainers, ["zhongwencool"]},
-  {licenses, ["MIT"]},
-  {links, [{"Github", "https://github.com/zhongwencool/erl-env"}]}
- ]}.
+    [{description, "Application Configuration Manager"},
+        {vsn, "0.1.0"},
+        {registered, []},
+        {applications,
+            [kernel, stdlib]},
+        {env, []},
+        {modules, []},
+        {maintainers, ["zhongwencool"]},
+        {licenses, ["MIT"]},
+        {links, [{"Github", "https://github.com/zhongwencool/erl-env"}]}
+    ]}.
